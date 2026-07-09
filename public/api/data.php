@@ -1,7 +1,13 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 require_once __DIR__ . '/../../src/LogReader.php';
 
-$reader = new LogReader(__DIR__ . '/../../log/peterhuppertz.net/sitetest.log');
+$site = $_GET['site'] ?? null;
+
+if (!$site) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Missing site parameter']);
+    exit;
+}
+
+$reader = new LogReader(__DIR__ . "/../../log/sitemonitor/$site/sitetest.log");
 echo json_encode($reader->getData());
