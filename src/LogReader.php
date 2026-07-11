@@ -6,7 +6,6 @@ class LogReader {
     public function __construct($path) {
         $this->path = $path;
     }
-
     public function getData() {
         $timestamps = [];
         $protocols = [];
