@@ -14,7 +14,7 @@
     </select>
     <canvas id="responseChart"></canvas>
     <button onclick="responseChart.resetZoom()">Reset Zoom</button>
-    <script>
+    <script>        
         let responseChart = null;
         fetch('api/sites.php')
             .then(r => r.json())
@@ -44,8 +44,11 @@
                     const ipv4Times  = data.ipv4Data.map(x => x.responseTime);
                     const ipv6Times  = data.ipv6Data.map(x => x.responseTime);
                     const errorTimes = data.ipErrorData.map(x => x.responseTime);
-
+                    const averagesPerDay = data.averagesPerDay;
                     const ctx = document.getElementById('responseChart').getContext('2d');
+
+                    console.log("Averages per day:", averagesPerDay); // Log the averages for debugging
+
                     ctx.canvas.style.maxHeight = '80vh';
 
                     responseChart = new Chart(ctx, {
