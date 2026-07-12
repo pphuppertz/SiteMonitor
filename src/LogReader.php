@@ -16,7 +16,10 @@ class LogReader {
         $ipv4Data = [];
         $ipv6Data = [];
         $ipErrorData = [];
-        $averagesPerDay = [];
+        $ipv4Averages = [];
+        $ipv6Averages = [];
+        $ipv4Medians = [];
+        $ipv6Medians = [];
 
         foreach (file($this->path) as $line) {
             $line = trim($line);
@@ -58,17 +61,23 @@ class LogReader {
                 ];                
             }
         }
-        $averagesPerDay = $this->getAveragesPerDay(); 
-        
+        $ipv4Averages = $this->getAveragesPerDay('ipv4');
+        $ipv6Averages = $this->getAveragesPerDay('ipv6');
+        // $ipv4Medians = $this->getMediansPerDay('ipv4');
+        // $ipv6Medians = $this->getMediansPerDay('ipv6');
+
         return [
             'ipv4Data' => $ipv4Data,
             'ipv6Data' => $ipv6Data,
             'ipErrorData' => $ipErrorData,
-            'averagesPerDay' => $averagesPerDay,
+            'ipv4Averages' => $ipv4Averages,
+            'ipv6Averages' => $ipv6Averages,
+            'ipv4Medians' => $ipv4Medians,
+            'ipv6Medians' => $ipv6Medians,
         ];
     }
 
-    public function getAveragesPerDay() {
+    public function getAveragesPerDay($protocolToCalculate) {
         $dailyData = [];
 
         foreach (file($this->path) as $line) {
@@ -84,7 +93,7 @@ class LogReader {
             $time      = (float)$parts[3];
             $error     = (int)$parts[4];
 
-            if ($status === 200 && $error === 0) {
+            if ($status === 200 && $error === 0 && $protocol === $protocolToCalculate) {
                 $date = substr($timestamp, 0, 10); // Extract date part
                 if (!isset($dailyData[$date])) {
                     $dailyData[$date] = ['totalTime' => 0, 'count' => 0];
@@ -93,14 +102,16 @@ class LogReader {
                 $dailyData[$date]['count']++;
             }
         }
-
+        
         // Calculate averages
         foreach ($dailyData as $date => &$data) {
             if ($data['count'] > 0) {
                 $data['averageTime'] = $data['totalTime'] / $data['count'];
+                
             } else {
                 $data['averageTime'] = null;
             }
+
         }        
         return $dailyData;
     }
