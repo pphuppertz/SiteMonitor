@@ -1,0 +1,25 @@
+# --- VS Code ---
+.vscode/
+
+# --- Scratch runner ---
+scratch/
+
+# --- PHP runtime junk ---
+*.log
+*.cache
+
+# --- Windows noise ---
+Thumbs.db
+Desktop.ini
+
+# --- IIS / local webserver artifacts ---
+iisnode/
+wwwroot/
+
+# --- Composer (if you ever add it) ---
+vendor/
+composer.lock
+
+# --- Environment / secrets ---
+.env
+.env.local
