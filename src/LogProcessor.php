@@ -13,11 +13,9 @@ class LogProcessor {
         $ipv6Data = [];
         $ipErrorData = [];
         $logEntries = [];
-        // $ipv4Averages = [];
-        // $ipv6Averages = [];
-        // $ipv4Medians = [];
-        // $ipv6Medians = [];
-    
+        $ipv4DailyStats = [];
+        $ipv6DailyStats = [];
+        
         foreach (file($this->path) as $line) {
             $line = trim($line);
             if ($line === '') continue;
@@ -45,22 +43,54 @@ class LogProcessor {
             array_filter($logEntries, fn($entry) => $entry->statusCode !== 200 || $entry->error !== 0)
         );
 
+        $ipv4DailyStats = $this->getDataPerDay(array_filter($logEntries, fn($entry) => $entry->protocol === 'ipv4'));
+        $ipv6DailyStats = $this->getDataPerDay(array_filter($logEntries, fn($entry) => $entry->protocol === 'ipv6'));
+
         return [
             'ipv4Data' => $ipv4Data,
             'ipv6Data' => $ipv6Data,
             'ipErrorData' => $ipErrorData,
-            // 'ipv4Averages' => $ipv4Averages,
-            // 'ipv6Averages' => $ipv6Averages,
-            // 'ipv4Medians' => $ipv4Medians,
-            // 'ipv6Medians' => $ipv6Medians,
+            'ipv4DailyStats' => $ipv4DailyStats,
+            'ipv6DailyStats' => $ipv6DailyStats,            
         ];
     }
 
-    public function getAveragesPerDay($protocolToCalculate) {
+    public function getDataPerDay(array $logEntries): array {
         $dailyData = [];
-
         
-
-
+        foreach ($logEntries as $entry) {
+            if ($entry->statusCode === 200 && $entry->error === 0) {
+                $date = substr($entry->timestamp, 0, 10); // Extract the date part (YYYY-MM-DD)
+                if (!isset($dailyData[$date])) {
+                    $dailyData[$date] = [];
+                }
+                // $dailyData[$date][] = $entry->responseTime;
+            }
         }
-    }            
+
+        foreach ($dailyData as $date => &$data) {            
+            $totaltime = 0;
+            if (count($logEntries) > 0) {
+                $responseTimes = [];
+                foreach ($logEntries as $entry) {
+                    if (substr($entry->timestamp, 0, 10) === $date) {
+                        $responseTimes[] = $entry->responseTime;
+                        $totalTime += $entry->responseTime;
+                    }
+                }
+                sort($responseTimes, SORT_NUMERIC);                    
+                $middle = intdiv(count($responseTimes), 2);
+                if (count($responseTimes) % 2) { // Odd number of elements
+                    $data['medianTime'] = $responseTimes[$middle];
+                } else { // Even number of elements
+                    echo ($responseTimes[$middle - 1] + $responseTimes[$middle]) / 2;
+                    $data['medianTime'] = ($responseTimes[$middle - 1] + $responseTimes[$middle]) / 2;
+                }
+                $data['averageTime'] = $totaltime / count($responseTimes);
+            } else {
+                $data['averageTime'] = null;
+            }
+        }
+        return $dailyData;
+    }
+}           

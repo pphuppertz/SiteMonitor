@@ -39,24 +39,28 @@
             fetch("api/data.php?site=" + encodeURIComponent(site))
                 .then(r => r.json())
                 .then(data => {
-                    // console.log("IPv4 data:", data.ipv4Data); // Log the IPv4 data for debugging
-                    // console.log("IPv6 data:", data.ipv6Data); // Log the IPv6 data for debugging
-                    // console.log("Error data:", data.ipErrorData); // Log the error data for debugging
+                    console.log("IPv4 data:", data.ipv4Data); // Log the IPv4 data for debugging
+                    console.log("IPv6 data:", data.ipv6Data); // Log the IPv6 data for debugging
+                    console.log("Error data:", data.ipErrorData); // Log the error data for debugging
 
-                    console.log(data);
-                    console.log(Array.isArray(data));
-                    console.log(data.ipv4Data);
+                    // console.log(data);
+                    // console.log(Array.isArray(data));
+                    
                     const labels = data.ipv4Data.map(x => x.timestamp).map(t => t.replace(' ', 'T'));
 
                     const ipv4Times  = data.ipv4Data.map(x => x.responseTime);
                     const ipv6Times  = data.ipv6Data.map(x => x.responseTime);
                     const errorTimes = data.ipErrorData.map(x => x.responseTime);
-                    // const ipv4Averages = data.ipv4Averages;
-                    // const ipv6Averages = data.ipv6Averages;
+                    const ipv4DailyStats = data.ipv4DailyStats;
+                    const ipv6DailyStats = data.ipv6DailyStats;
                     const ctx = document.getElementById('responseChart').getContext('2d');
                     
-                    // console.log("IPv4 averages:", ipv4Averages); // Log the averages for debugging
-                    // console.log("IPv6 averages:", ipv6Averages); // Log the averages for debugging
+                    console.log("IPv4 daily stats:", ipv4DailyStats); // Log the averages for debugging
+                    console.log("IPv6 daily stats:", ipv6DailyStats); // Log the averages for debugging
+                    console.log(ipv4DailyStats['2026-07-10']['medianTime']); // Log the averages for a specific date for debugging
+                    console.log(ipv6DailyStats['2026-07-10']['medianTime']); // Log the averages for a specific date for debugging
+                    console.log(ipv4DailyStats['2026-07-10']['averageTime']);   
+                    console.log(ipv6DailyStats['2026-07-10']['averageTime']);
 
                     ctx.canvas.style.maxHeight = '80vh';
 
@@ -69,7 +73,7 @@
                                     label: 'IPv4',
                                     data: ipv4Times,
                                     borderColor: 'blue',
-                                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                                    backgroundColor: 'rgba(156, 156, 229, 0.1)',
                                     tension: 0.2
                                 },
                                {
