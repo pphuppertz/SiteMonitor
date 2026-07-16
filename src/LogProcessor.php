@@ -1,27 +1,30 @@
 <?php
 require_once __DIR__ . '/../src/LogEntry.php';
 
-class LogProcessor {
+class LogProcessor
+{
     private $path;
 
-    public function __construct($path) {
+    public function __construct($path)
+    {
         $this->path = $path;
     }
 
-    public function readData() {
+    public function readData()
+    {
         $ipv4Data = [];
         $ipv6Data = [];
         $ipErrorData = [];
         $logEntries = [];
         $ipv4DailyStats = [];
         $ipv6DailyStats = [];
-        
+
         foreach (file($this->path) as $line) {
             $line = trim($line);
             if ($line === '') continue;
 
             $parts = explode(';', $line);
-            
+
             if (count($parts) !== 5) continue;
 
             $logEntry = new LogEntry(
@@ -35,7 +38,7 @@ class LogProcessor {
         }
         $ipv4Data = array_values(
             array_filter($logEntries, fn($entry) => $entry->protocol === 'ipv4' && $entry->statusCode === 200 && $entry->error === 0)
-            );
+        );
         $ipv6Data = array_values(
             array_filter($logEntries, fn($entry) => $entry->protocol === 'ipv6' && $entry->statusCode === 200 && $entry->error === 0)
         );
@@ -51,13 +54,14 @@ class LogProcessor {
             'ipv6Data' => $ipv6Data,
             'ipErrorData' => $ipErrorData,
             'ipv4DailyStats' => $ipv4DailyStats,
-            'ipv6DailyStats' => $ipv6DailyStats,            
+            'ipv6DailyStats' => $ipv6DailyStats,
         ];
     }
 
-    public function getDataPerDay(array $logEntries): array {
+    public function getDataPerDay(array $logEntries): array
+    {
         $dailyData = [];
-        
+
         foreach ($logEntries as $entry) {
             if ($entry->statusCode === 200 && $entry->error === 0) {
                 $date = substr($entry->timestamp, 0, 10); // Extract the date part (YYYY-MM-DD)
@@ -68,29 +72,35 @@ class LogProcessor {
             }
         }
 
-        foreach ($dailyData as $date => &$data) {            
-            $totaltime = 0;
-            if (count($logEntries) > 0) {
-                $responseTimes = [];
-                foreach ($logEntries as $entry) {
-                    if (substr($entry->timestamp, 0, 10) === $date) {
-                        $responseTimes[] = $entry->responseTime;
-                        $totalTime += $entry->responseTime;
-                    }
+        foreach ($dailyData as $date => &$data) {
+            $responseTimes = [];
+            $totalTime = 0;
+
+            foreach ($logEntries as $entry) {
+                if (substr($entry->timestamp, 0, 10) === $date) {
+                    $responseTimes[] = $entry->responseTime;
+                    $totalTime += $entry->responseTime;
                 }
-                sort($responseTimes, SORT_NUMERIC);                    
-                $middle = intdiv(count($responseTimes), 2);
-                if (count($responseTimes) % 2) { // Odd number of elements
+            }
+
+            if (count($responseTimes) > 0) {
+                sort($responseTimes, SORT_NUMERIC);
+
+                $count = count($responseTimes);
+                $middle = intdiv($count, 2);
+
+                if ($count % 2) {
                     $data['medianTime'] = $responseTimes[$middle];
-                } else { // Even number of elements
-                    echo ($responseTimes[$middle - 1] + $responseTimes[$middle]) / 2;
+                } else {
                     $data['medianTime'] = ($responseTimes[$middle - 1] + $responseTimes[$middle]) / 2;
                 }
-                $data['averageTime'] = $totaltime / count($responseTimes);
+
+                $data['averageTime'] = $totalTime / $count;
             } else {
+                $data['medianTime'] = null;
                 $data['averageTime'] = null;
             }
         }
         return $dailyData;
     }
-}           
+}
