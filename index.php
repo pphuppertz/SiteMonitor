@@ -4,8 +4,8 @@
 <head>
     <title>SiteMonitor</title>
     <!-- <link rel="stylesheet" href="styles.css"> -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
 </head>
 
@@ -16,7 +16,8 @@
     </select>
     <canvas id="responseChart"></canvas>
     <button onclick="responseChart.resetZoom()">Reset Zoom</button>
-    <script>
+    
+    <script>        
         let responseChart = null;
         fetch('api/sites.php')
             .then(r => r.json())
@@ -82,7 +83,7 @@
                     ctx.canvas.style.maxHeight = '80vh';
 
                     responseChart = new Chart(ctx, {
-                        type: 'line',
+                        type: 'scatter',
                         data: {
                             datasets: [
                                 {
@@ -90,7 +91,7 @@
                                     data: ipv4DailyMedian,
                                     borderColor: 'orange',
                                     backgroundColor: 'orange',
-                                    pointRadius: 2,
+                                    pointRadius: 6,
                                     showLine: true,
                                     fill: false,
                                 },
@@ -99,7 +100,7 @@
                                     data: ipv6DailyMedian,
                                     borderColor: 'yellow',
                                     backgroundColor: 'yellow',
-                                    pointRadius: 2,
+                                    pointRadius: 6,
                                     showLine: true,
                                     fill: false,
                                 },    
@@ -121,8 +122,11 @@
                                     label: 'Errors',
                                     data: errorTimes,
                                     borderColor: 'red',
-                                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                                    tension: 0.2
+                                    backgroundColor: 'red',
+                                    tension: 0.2,
+                                    pointRadius: 6,
+                                    showLine: false,
+                                    fill: true,
                                 }                                
                             ]
                         },
