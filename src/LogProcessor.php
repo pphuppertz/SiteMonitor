@@ -64,7 +64,9 @@ class LogProcessor
 
         foreach ($logEntries as $entry) {
             if ($entry->statusCode === 200 && $entry->error === 0) {
-                $date = substr($entry->timestamp, 0, 10); // Extract the date part (YYYY-MM-DD)
+                $dt = new DateTime($entry->timestamp, new DateTimeZone('UTC'));
+                $dt->setTimezone(new DateTimeZone('Europe/Amsterdam'));
+                $date = $dt->format('Y-m-d');
                 if (!isset($dailyData[$date])) {
                     $dailyData[$date] = [];
                 }
